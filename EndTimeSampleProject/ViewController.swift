@@ -7,19 +7,36 @@
 //
 
 import UIKit
+import MediaPlayer
 
 class ViewController: UIViewController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+    @IBAction func didSelectPlayFromAppleMusic(_ sender: Any) {
+        let storeId = "14922794"
+        let descriptor = MPMusicPlayerStoreQueueDescriptor.init(storeIDs: [storeId])
+        
+        descriptor.setStartTime(0.0, forItemWithStoreID: storeId)
+        descriptor.setEndTime(2.0, forItemWithStoreID: storeId)
+        play(descriptor: descriptor)
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    @IBAction func didSelectPlayLocally(_ sender: Any) {
+        guard let songCollection =  MPMediaQuery.songs().collections?.first else { return }
+        guard let firstSong = songCollection.items.first else { return }
+        
+        let descriptor = MPMusicPlayerMediaItemQueueDescriptor(itemCollection: songCollection)
+        descriptor.setStartTime(0.0, for: firstSong)
+        descriptor.setEndTime(2.0, for: firstSong)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.play(descriptor: descriptor)
+        }
     }
-
-
+    
+    func play(descriptor: MPMusicPlayerQueueDescriptor) {
+        let player = MPMusicPlayerController.applicationMusicPlayer
+        player.setQueue(with: descriptor)
+        player.play()
+    }
 }
 
